@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-import re, glob, time, os
+import re, glob, os
 from bs4 import BeautifulSoup
-start = time.time()
 
 # Create dir if it does not exist
 dir = '../../output/preprocessed/'
@@ -12,7 +11,6 @@ if not os.path.exists(dir):
 files = [f for f in glob.glob('../../input/' + "**/*.html", recursive=True)]
 
 # Pre-processing
-i = 0
 for fileLoc in files:
     # Files reading
     file = open(fileLoc, 'r').read().lower().replace('\n', ' ')
@@ -24,10 +22,3 @@ for fileLoc in files:
     file = open(name + '.txt', 'w')
     file.write(soup.text)
     file.close()
-    print(i)
-    i += 1
-
-print(len(files))
-
-end = time.time()
-print(end-start)
