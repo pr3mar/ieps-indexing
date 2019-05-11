@@ -1,24 +1,35 @@
 # -*- coding: utf-8 -*-
-import re, glob, os
+import re
+import glob
+import time
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 from bs4 import BeautifulSoup
+from stopwords import stop_words_slovene
 
-# Create dir if it does not exist
-dir = '../../output/preprocessed/'
-if not os.path.exists(dir):
-    os.makedirs(dir)
+class PreprocessingText:
+    def prep(inputPath, outputPath):
 
-# Find all .html files
-files = [f for f in glob.glob('../../input/' + "**/*.html", recursive=True)]
+        def tokenize(text):
+            tokens = word_tokenize(text)
+            tokens = [i for i in tokens if i not in stop_words_slovene]
+            return tokens
+            
+        def writeData(name, text):
+            file = open(outputPath + name, 'w')
+            file.write(text)
+            file.close()
 
-# Pre-processing
-for fileLoc in files:
-    # Files reading
-    file = open(fileLoc, 'r').read().lower().replace('\n', ' ')
-    soup = BeautifulSoup(file, "lxml")
-    [s.extract() for s in soup(['iframe', 'script', 'head'])]
-    name = r'.*/(.*).html'
-    matchName = re.compile(name).search(fileLoc)
-    name = dir + matchName.group(1)
-    file = open(name + '.txt', 'w')
-    file.write(soup.text)
-    file.close()
+
+        # Find all .html files
+        files = [f for f in glob.glob(inputPath + "**/*.html", recursive=True)]
+        for fileLoc in files:
+            # Files reading
+            file = open(fileLoc, 'r').read().lower().replace('\n', ' ')
+            soup = BeautifulSoup(file, "lxml")
+            [s.extract() for s in soup(['iframe', 'script', 'head'])]
+            tokens = tokenize(str(soup.text))
+            name = r'.*/(.*).html'
+            matchName = re.compile(name).search(fileLoc)
+            name = matchName.group(1) + '.txt'
+            writeData(name, str(tokens))
