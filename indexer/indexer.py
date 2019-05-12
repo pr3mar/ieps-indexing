@@ -1,8 +1,38 @@
 # -*- coding: utf-8 -*-
-from indexer.preprocess.preprocessing import PreprocessingText
+import argparse
+from documentQuerying import DocumentQuerying
+from preprocess import Preprocess
+from utils import timing
+from index import IndexFactory
+from db import DB
 
-inputDir = 'path to inputs'
-outputDir = 'where to write preprocessed data'
+# executes the:
+#   - pre-processing
+#   - indexing
+#   - querying
+@timing
+def main(indexType, inputPath, outputPath, userQuery, run=True):
+    inputTokens = Preprocess.preprocess(inputPath, outputPath, dumpToFile=True)
+    db = DB(inputPath)
+    index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
+    index.buildIndex()
+    query = DocumentQuerying(userQuery, index)
 
-PreprocessingText.prep(inputDir, outputDir)
+
+# get user arguments:
+#   - input and output paths,
+#   - operation mode [build, run]
+#       - build -> builds the indices
+#       - run   -> executes a query on the built indices
+#   - [optional] indexer kind [inverse, sequential] -> if we are not running the query we do not need this
+#   - [optional] user query -> if an index is being built we do not need this
+def processArgs():
+    parser = argparse.ArgumentParser()
+    parser.parse_args()
+
+
+if __name__ == "__main__":
+
+    main('reverse', 'input', 'output', 'my query')
+    main('sequential', 'input', 'output', 'my query')
 
