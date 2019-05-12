@@ -275,7 +275,3 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
-
-# python related
-__pycache__/
-*.py[cod]
