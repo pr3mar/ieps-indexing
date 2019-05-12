@@ -8,6 +8,6 @@ def timing(f):
     def wrapper(*args, **kwargs):
         start = datetime.now()
         result = f(*args, **kwargs)
-        print(f'Time elapsed for `{f.__name__}`: {(datetime.now() - start).total_seconds() * 1e3} ms')
+        print(f'Time elapsed for `{f.__name__}`: {((datetime.now() - start).total_seconds() * 1e3):.2f} ms')
         return result
     return wrapper

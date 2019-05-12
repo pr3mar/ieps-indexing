@@ -1,32 +1,37 @@
+import glob
+import re
+import json
+import os
 from utils import timing
-from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from inscriptis import get_text
+from .stopwords import stop_words_slovene
 
 
 class Preprocess:
 
-    def tokenize(self, input):
-        tokens = word_tokenize(text)
-        tokens = [i for i in tokens if i not in stop_words_slovene]
-        return tokens
+    @staticmethod
+    def tokenize(text):
+        return [token for token in word_tokenize(text) if token not in stop_words_slovene]
 
     @staticmethod
     @timing
-    def preprocess(inputPath, outputPath, dumpToFile=False):
-        # TODO: @Stefan copy the code here
-        # return in the following format
-        # [
-        #     {
-        #         "fileName": "<inputFileName>", // just the name, not the entire path
-        #         "tokens": ["<token1>", "<token2>"]
-        #     },
-        #     {
-        #         "fileName": "<inputFileName>",
-        #         "tokens": ["<token1>", "<token2>"]
-        #     },
-        #     ...
-        #     {
-        #         "fileName": "<inputFileName>",
-        #         "tokens": ["<token1>", "<token2>"]
-        #     },
-        # ]
-        return []
+    def preprocessFiles(rootInputPath, outputPath, forceUpdate=False):
+        outputFilePath = f"{outputPath}/processed.json"
+        if os.path.isfile(outputFilePath) and forceUpdate == False:
+            with open(outputFilePath, "r") as file:
+                return json.load(file)
+        processed = []
+        # Find all .html files
+        inputPaths = [f for f in glob.glob(rootInputPath + "**/*.html", recursive=True)]
+        for idx, documentPath in enumerate(inputPaths):
+            print(f"[{(idx / len(inputPaths)) * 100:.0f}%] Working on {documentPath}")
+            with open(documentPath, 'r') as file:
+                tokens = Preprocess.tokenize(re.sub(r'<[^<]+?>', '', get_text(file.read().lower())))
+                processed.append({
+                    "fileName": re.compile(r'.*/(.*).html').search(documentPath).group(1),
+                    "tokens": tokens
+                })
+        with open(outputFilePath, "w") as file:
+            json.dump(processed, file, indent=4, sort_keys=True)
+        return processed
