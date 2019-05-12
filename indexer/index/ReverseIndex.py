@@ -21,7 +21,7 @@ class ReverseIndex(Index):
                         reverseIndex[token].append(
                             {"filename": name, "freq": fajl['tokens'].count(token), "indexes": indices})
                 else:
-                    reverseIndex[token] = [{"filename": name, "freq": 0, "indexes": indices}]
+                    reverseIndex[token] = [{"filename": name, "freq": fajl['tokens'].count(token), "indexes": indices}]
         return reverseIndex
 
     @timing
