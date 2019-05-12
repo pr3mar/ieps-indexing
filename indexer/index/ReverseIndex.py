@@ -10,7 +10,17 @@ class ReverseIndex(Index):
     @timing
     def buildIndex(self):
         print("Building a reverse index")
+        reverseIndex = {} # holds the revers index
+        for file in self.inputTokens:
+            fileName = file.fileName
+            for token in file.tokens:
+                pass
+                # todo: if exists -> update
+                # if not -> add
+                # reverseIndex[token]
         # TODO
+        #   insert into Sqlite
+        #   AT MOST 2 INSERTS
 
     @timing
     def search(self):
