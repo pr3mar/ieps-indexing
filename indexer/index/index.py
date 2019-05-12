@@ -1,6 +1,6 @@
 class Index(object):
     def __init__(self, inputTokens, outputPath, db):
-        self.inputPath = inputTokens
+        self.inputTokens = inputTokens
         self.outputPath = outputPath
         self.db = db
 
@@ -8,7 +8,7 @@ class Index(object):
         # Builds the index
         pass
 
-    def search(self):
+    def search(self, userQuery):
         # searches the index
         pass
 

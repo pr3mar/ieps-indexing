@@ -12,8 +12,8 @@ class ReverseIndex(Index):
         print("Building a reverse index")
         reverseIndex = {} # holds the revers index
         for file in self.inputTokens:
-            fileName = file.fileName
-            for token in file.tokens:
+            fileName = file["fileName"]
+            for token in file["tokens"]:
                 pass
                 # todo: if exists -> update
                 # if not -> add
@@ -23,5 +23,5 @@ class ReverseIndex(Index):
         #   AT MOST 2 INSERTS
 
     @timing
-    def search(self):
+    def search(self, userQuery):
         print("Searching the reverse index")

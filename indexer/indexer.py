@@ -15,6 +15,8 @@ def main(indexType, inputPath, outputPath, userQuery, run=True):
     db = DB(inputPath)
     index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
     index.buildIndex()
+    results = index.search(userQuery)
+    print(json.dumps(results, indent=4, sort_keys=True))
     query = DocumentQuerying(userQuery, index)
 
 
@@ -31,6 +33,4 @@ def processArgs():
 
 
 if __name__ == "__main__":
-
-    main('reverse', 'input', 'output', 'my query')
-    main('sequential', 'input', 'output', 'my query')
+    main('sequential', '../input', '../output', 'marko')
