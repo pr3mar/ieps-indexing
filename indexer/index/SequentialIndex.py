@@ -3,8 +3,8 @@ from .index import Index
 
 
 class SequantialIndex(Index):
-    def __init__(self, inputPath, outputPath):
-        super(SequantialIndex, self).__init__(inputPath, outputPath)
+    def __init__(self, inputTokens, outputPath, db):
+        super(SequantialIndex, self).__init__(inputTokens, outputPath, db)
 
     @timing
     def buildIndex(self):

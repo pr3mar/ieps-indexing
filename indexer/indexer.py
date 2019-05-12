@@ -3,7 +3,7 @@ from documentQuerying import DocumentQuerying
 from preprocess import Preprocess
 from utils import timing
 from index import IndexFactory
-
+from db import DB
 
 # executes the:
 #   - pre-processing
@@ -11,8 +11,9 @@ from index import IndexFactory
 #   - querying
 @timing
 def main(indexType, inputPath, outputPath, userQuery, run=True):
-    Preprocess.preprocess(inputPath, outputPath)
-    index = IndexFactory.getIndexByType(indexType, inputPath, outputPath)
+    inputTokens = Preprocess.preprocess(inputPath, outputPath, dumpToFile=True)
+    db = DB(inputPath)
+    index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
     index.buildIndex()
     query = DocumentQuerying(userQuery, index)
 
