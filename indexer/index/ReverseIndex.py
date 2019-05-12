@@ -10,17 +10,19 @@ class ReverseIndex(Index):
     @timing
     def buildIndex(self):
         print("Building a reverse index")
-        reverseIndex = {} # holds the revers index
-        for file in self.inputTokens:
-            fileName = file.fileName
-            for token in file.tokens:
-                pass
-                # todo: if exists -> update
-                # if not -> add
-                # reverseIndex[token]
-        # TODO
-        #   insert into Sqlite
-        #   AT MOST 2 INSERTS
+        reverseIndex = {}  # holds the revers index
+
+        for fajl in self.inputTokens:
+            name = fajl['fileName']
+            for token in fajl['tokens']:
+                indices = [i for i, x in enumerate(fajl["tokens"]) if x == token]
+                if token in reverseIndex:
+                    if fajl['tokens'].count(token) < 2:
+                        reverseIndex[token].append(
+                            {"filename": name, "freq": fajl['tokens'].count(token), "indexes": indices})
+                else:
+                    reverseIndex[token] = [{"filename": name, "freq": 0, "indexes": indices}]
+        return reverseIndex
 
     @timing
     def search(self):

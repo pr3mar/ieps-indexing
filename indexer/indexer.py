@@ -31,6 +31,7 @@ def processArgs():
 
 
 if __name__ == "__main__":
+    pass
 
-    main('reverse', 'input', 'output', 'my query')
-    main('sequential', 'input', 'output', 'my query')
+    #main('reverse', 'input', 'output', 'my query')
+    #main('sequential', 'input', 'output', 'my query')

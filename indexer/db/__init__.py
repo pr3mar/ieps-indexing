@@ -11,9 +11,35 @@ class DB(object):
     #   - write into table <>
     #   - update table
     #   - truncate database
-    def __init__(self, inputPath, dbName = "indexer"):
-        pass
 
-    def getWord(self, word):
-        pass
-        # TODO: execute query on Word table
+    #inicijalizacija uspjesna
+    def __init__(self, inputPath, dbName = "indexer"):
+        # konekcija na bazu
+        conn = sqlite3.connect(inputPath + dbName)
+        # pravljenje tabela
+        c = conn.cursor()
+        try:
+            c.execute('''
+                    CREATE TABLE IndexWord (
+                        word TEXT PRIMARY KEY
+                                    );
+                        ''')
+            c.execute(''' CREATE TABLE Posting (
+                        word TEXT NOT NULL,
+                        documentName TEXT NOT NULL,
+                        frequency INTEGER NOT NULL,
+                        indexes TEXT NOT NULL,
+                        PRIMARY KEY(word, documentName),
+                        FOREIGN KEY (word) REFERENCES IndexWord(word)
+                            ); 
+                        ''')
+            c.executescript(''' 
+                        CREATE TABLE existing(doesExist BOOLEAN NOT NULL CHECK (doesExist IN (0,1)));''')
+        except:
+            print('Database already exists')
+
+
+
+
+
+
