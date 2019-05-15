@@ -14,10 +14,10 @@ from db import DB
 @timing
 def main(indexType, inputPath, outputPath, userQuery, run=True):
     inputTokens = Preprocess.preprocessFiles(inputPath, outputPath)
-    db = DB(inputPath)
-    index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
-    index.buildIndex()
-    query = DocumentQuerying(userQuery, index)
+    # db = DB(inputPath)
+    # index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
+    # index.buildIndex()
+    # query = DocumentQuerying(userQuery, index)
 
 
 # get user arguments:
