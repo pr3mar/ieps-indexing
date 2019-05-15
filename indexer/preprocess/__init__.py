@@ -34,11 +34,10 @@ class Preprocess:
                 text = re.sub(r'<[^<]+?>', '', get_text(file.read().lower()))
                 content = Preprocess.contentize(text)
                 tokens = Preprocess.tokenize(text)
-                processed.append({
-                    "fileName": re.compile(r'.*/(.*).html').search(documentPath).group(1),
+                processed[re.compile(r'.*/(.*).html').search(documentPath).group(1)] = {
                     "tokens": tokens,
                     "content": content
-                })
+                }
         with open(outputFilePath, "w") as file:
             json.dump(processed, file, indent=4)
         return processed
