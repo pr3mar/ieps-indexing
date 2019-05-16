@@ -2,14 +2,13 @@ import glob
 import re
 import json
 import os
-import codecs
 from utils import timing
 from nltk.tokenize import word_tokenize
 from inscriptis import get_text
 from .stopwords import stop_words_slovene
 
-class Preprocess:
 
+class Preprocess:
     @staticmethod
     def tokenize(text):
         return [token for token in word_tokenize(text) if token not in stop_words_slovene and re.match('\w', token)]
@@ -35,7 +34,6 @@ class Preprocess:
                     "tokens": Preprocess.tokenize(text),
                     "content": Preprocess.contentize(text)
                 }
-            break
         with open(outputFilePath, mode="w", encoding="utf-8") as file:
             json.dump(processed, file, ensure_ascii=False)
         return processed
