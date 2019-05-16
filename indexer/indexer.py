@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import argparse
-import json
 from documentQuerying import DocumentQuerying
 from preprocess import Preprocess
 from utils import timing
@@ -16,7 +15,7 @@ def main(indexType, inputPath, outputPath, userQuery, run=True):
     inputTokens = Preprocess.preprocessFiles(inputPath, outputPath)
     db = DB(inputPath)
     index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
-    index.buildIndex()
+    # index.buildIndex()
     query = DocumentQuerying(userQuery, index)
 
 
