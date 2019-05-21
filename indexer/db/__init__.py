@@ -71,4 +71,10 @@ class DB(object):
         except Exception as err:
             print("Query failed {}".format(err))
 
+    def getPostingsOfWord(self,listOfWords):
+        query = f"SELECT * FROM Posting WHERE word in ({','.join(['?'] * len(listOfWords))})"
+        kurs = self.conn.cursor()
+        kurs.execute(query,listOfWords)
+        rows = kurs.fetchall()
+        return rows
 

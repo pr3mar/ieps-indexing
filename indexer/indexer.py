@@ -18,7 +18,9 @@ def main(indexType, inputPath, outputPath, userQuery, run=True):
     index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
     rev = ReverseIndex(inputTokens, outputPath,db)
     rev.writeToDb()
-
+    lista = ["republika","slovenija"]
+    red = db.getPostingsOfWord(lista)
+    print(red)
     query = DocumentQuerying(userQuery, index)
 
 
