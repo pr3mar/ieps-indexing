@@ -1,13 +1,19 @@
-import sqlite3
+import sqlite3,os.path
 from utils import timing
 
 # TODO handle sqlite
 class DB(object):
 
 
-    def __init__(self, inputPath, dbName = "indexer"):
-
-        self.conn = sqlite3.connect(inputPath + dbName)
+    def __init__(self, inputPath, dbName = "indexer.db"):
+        dbPath = os.path.join(inputPath,dbName)
+        if os.path.exists(dbPath):
+            os.remove(dbPath)
+            print("Database file exists,deleting the file")
+        else:
+            os.mknod(dbPath)
+        self.conn = sqlite3.connect(dbPath)
+        print('Database is made in: {}'.format(dbPath))
         self.c = self.conn.cursor()
         try:
             self.c.executescript('''
@@ -19,6 +25,7 @@ class DB(object):
                             documentName TEXT NOT NULL,
                             frequency INTEGER NOT NULL,
                             indexes TEXT NOT NULL,
+                            indexes_content TEXT NOT NULL,
                             PRIMARY KEY(word, documentName),
                             FOREIGN KEY (word) REFERENCES IndexWord(word)
                                 ); 
@@ -29,31 +36,36 @@ class DB(object):
 
     def insertWord(self, lista):
         try:
+            kurs = self.conn.cursor()
             for item in lista:
-                self.c.execute("INSERT INTO IndexWord(word) VALUES(?)", [item])
+                kurs.execute("INSERT INTO IndexWord(word) VALUES(?)", [item])
             self.conn.commit()
         except Exception as err:
             print('Inserting into IndexWord table failed : {}'.format(str(err)))
 
     def insertPosting(self, postlist):
         try:
+            kurs = self.conn.cursor()
             for item in postlist:
-                self.c.execute("INSERT INTO Posting(word,documentName,frequency,indexes) VALUES(?,?,?,?)", item)
+                kurs.execute\
+                    ("INSERT INTO Posting(word,documentName,frequency,indexes,indexes_content) VALUES(?,?,?,?,?)", item)
             self.conn.commit()
         except Exception as err:
             print('Inserting into Posting table failed : {}'.format(str(err)))
 
         #exists("0","1")
     def insertExists(self, exists):
+        kurs = self.conn.cursor()
         try:
-            self.c.execute("INSERT INTO Existing(doesExist) VALUES (?)", exists)
+            kurs.execute("INSERT INTO Existing(doesExist) VALUES (?)", exists)
             self.conn.commit()
         except Exception as err:
             print("Inserting into Existing table failed : {}".format(str(err)))
 
     def getExists(self):
+        kurs = self.conn.cursor()
         try:
-            self.c.execute("SELECT * FROM Existing")
+            kurs.execute("SELECT * FROM Existing")
             self.conn.commit()
             return True if int(self.c.fetchone()[0]) else False
         except Exception as err:

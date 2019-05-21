@@ -277,5 +277,7 @@ TSWLatexianTemp*
 *.sta
 
 # python related
-__pycache__/
+__pycache__/*
 *.py[cod]
+.vscode/*
+output/*.json

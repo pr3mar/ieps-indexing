@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 import argparse
 from documentQuerying import DocumentQuerying
 from preprocess import Preprocess
 from utils import timing
 from index import IndexFactory
 from db import DB
+from index import ReverseIndex
 
 # executes the:
 #   - pre-processing
@@ -11,11 +13,14 @@ from db import DB
 #   - querying
 @timing
 def main(indexType, inputPath, outputPath, userQuery, run=True):
-    inputTokens = Preprocess.preprocess(inputPath, outputPath, dumpToFile=True)
+    inputTokens = Preprocess.preprocessFiles(inputPath, outputPath)
     db = DB(inputPath)
     index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
-    index.buildIndex()
+    rev = ReverseIndex(inputTokens, outputPath,db)
+    rev.writeToDb()
+
     query = DocumentQuerying(userQuery, index)
+
 
 
 # get user arguments:
@@ -31,7 +36,4 @@ def processArgs():
 
 
 if __name__ == "__main__":
-    pass
-
-    #main('reverse', 'input', 'output', 'my query')
-    #main('sequential', 'input', 'output', 'my query')
+    main('reverse', '../input', '../output', 'my query')
