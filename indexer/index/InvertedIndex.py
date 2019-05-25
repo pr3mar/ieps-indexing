@@ -1,23 +1,22 @@
-from utils import timing
+from utils import timing, timed
 from db import DB
 from .index import Index
-from preprocess import Preprocess
 
 
 class InvertedIndex(Index):
     def __init__(self, inputPath, outputPath, forceRecreate=False):
         super(InvertedIndex, self).__init__(inputPath, outputPath, forceRecreate)
         self.db = DB(outputPath, forceRecreate=forceRecreate)
+        self.indexerType = "Inverted Index"
 
-    @timing
+    @timed
     def buildIndex(self):
         if self.db.getExists() and not self.forceRecreate:
             return
         print("Building the reverse index")
-        preprocessed = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
         reverseIndex = {}
-        for documentName in preprocessed:
-            fileContent = preprocessed[documentName]
+        for documentName in self.preprocessed:
+            fileContent = self.preprocessed[documentName]
             for token in fileContent['tokens']:
                 indices = [str(i) for i, x in enumerate(fileContent['content']) if x == token]
                 posting = {"documentName": documentName, "frequency": len(indices), "indexes": ','.join(indices)}
@@ -39,7 +38,7 @@ class InvertedIndex(Index):
         self.db.insertPosting(postingRecord)
         self.db.insertExists()
 
-    @timing
+    @timed
     def search(self, query):
         """
         :param query: tokenized query

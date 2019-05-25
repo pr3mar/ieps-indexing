@@ -1,23 +1,20 @@
 # -*- coding: utf-8 -*-
 import argparse
-from documentQuerying import DocumentQuerying
-from preprocess import Preprocess
+from documentRetrieval import DocumentRetrieval
 from utils import timing
 from index import IndexFactory
-from db import DB
 
 # executes the:
 #   - pre-processing
 #   - indexing
 #   - querying
 @timing
-def main(indexType, inputPath, outputPath, userQuery, forceRecreate=False, run=True):
+def main(indexType, inputPath, outputPath, userQuery, forceRecreate=False):
     index = IndexFactory.getIndexByType(indexType, inputPath, outputPath, forceRecreate)
-    index.buildIndex()
-    red = index.search(Preprocess.tokenize(userQuery))
-    print(len(red))
-    print(sum([x[1] for x in red]))
-    query = DocumentQuerying(userQuery, index)
+    timePassed, result = index.buildIndex()
+    print(f"[{index.indexerType}] Time required to build the index: {timePassed:.2f} ms")
+    dr = DocumentRetrieval(index)
+    dr.query(userQuery)
 
 
 
@@ -34,5 +31,5 @@ def processArgs():
 
 
 if __name__ == "__main__":
-    main('inverted', '../input', '../output', 'Sistem SPOT')
-    main('sequential', '../input', '../output', 'Sistem SPOT')
+    main('inverted', '../input', '../output', 'Republika Slovenija')
+    main('sequential', '../input', '../output', 'Republika Slovenija')
