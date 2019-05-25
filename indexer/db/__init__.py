@@ -1,80 +1,73 @@
-import sqlite3,os.path
+import sqlite3
+import os.path
 from utils import timing
 
-# TODO handle sqlite
+
 class DB(object):
 
-
-    def __init__(self, inputPath, dbName = "indexer.db"):
-        dbPath = os.path.join(inputPath,dbName)
-        if os.path.exists(dbPath):
+    def __init__(self, outputPath, dbName="inverted-index.db", forceRecreate=False):
+        dbPath = os.path.join(outputPath, dbName)
+        if os.path.isfile(dbPath) and forceRecreate:
+            print("Forcing an update of the reverse index")
             os.remove(dbPath)
-            print("Database file exists,deleting the file")
-        else:
-            os.mknod(dbPath)
         self.conn = sqlite3.connect(dbPath)
-        print('Database is made in: {}'.format(dbPath))
-        self.c = self.conn.cursor()
+        self.cursor = self.conn.cursor()
         try:
-            self.c.executescript('''
-                        CREATE TABLE IndexWord (
-                            word TEXT PRIMARY KEY
-                                        );
-                        CREATE TABLE Posting (
-                            word TEXT NOT NULL,
-                            documentName TEXT NOT NULL,
-                            frequency INTEGER NOT NULL,
-                            indexes TEXT NOT NULL,
-                            indexes_content TEXT NOT NULL,
-                            PRIMARY KEY(word, documentName),
-                            FOREIGN KEY (word) REFERENCES IndexWord(word)
-                                ); 
-                            CREATE TABLE Existing(doesExist BOOLEAN NOT NULL CHECK (doesExist IN (0,1)));''')
+            self.cursor.executescript('''
+                CREATE TABLE IF NOT EXISTS IndexWord (
+                    word TEXT PRIMARY KEY
+                );
+                CREATE TABLE IF NOT EXISTS  Posting (
+                    word TEXT NOT NULL,
+                    documentName TEXT NOT NULL,
+                    frequency INTEGER NOT NULL,
+                    indexes TEXT NOT NULL,
+                    PRIMARY KEY(word, documentName),
+                    FOREIGN KEY (word) REFERENCES IndexWord(word)
+                );
+                CREATE TABLE IF NOT EXISTS Existing(doesExist BOOLEAN NOT NULL CHECK (doesExist IN (0,1)));
+            ''')
             self.conn.commit()
         except Exception as err:
-            print("Database creation failed: {}".format(str(err)))
+            raise Exception(f"Database creation failed: {str(err)}")
 
-    def insertWord(self, lista):
+    def insertWord(self, wordList):
         try:
-            kurs = self.conn.cursor()
-            for item in lista:
-                kurs.execute("INSERT INTO IndexWord(word) VALUES(?)", [item])
+            self.cursor.execute("BEGIN TRANSACTION")
+            for word in wordList:
+                self.cursor.execute("INSERT INTO IndexWord(word) VALUES(?)", [word])
             self.conn.commit()
         except Exception as err:
-            print('Inserting into IndexWord table failed : {}'.format(str(err)))
+            raise Exception(f'Inserting into IndexWord table failed : {str(err)}')
 
     def insertPosting(self, postlist):
         try:
-            kurs = self.conn.cursor()
+            self.conn.execute("BEGIN TRANSACTION")
             for item in postlist:
-                kurs.execute\
-                    ("INSERT INTO Posting(word,documentName,frequency,indexes,indexes_content) VALUES(?,?,?,?,?)", item)
+                self.cursor.execute("INSERT INTO Posting(word, documentName, frequency, indexes) VALUES(?, ?, ?, ?)", item)
             self.conn.commit()
         except Exception as err:
-            print('Inserting into Posting table failed : {}'.format(str(err)))
+            raise Exception(f'Inserting into Posting table failed : {str(err)}')
 
-        #exists("0","1")
-    def insertExists(self, exists):
-        kurs = self.conn.cursor()
+    def insertExists(self):
         try:
-            kurs.execute("INSERT INTO Existing(doesExist) VALUES (?)", exists)
+            self.cursor.execute("INSERT INTO Existing(doesExist) VALUES (?)", [1])
             self.conn.commit()
         except Exception as err:
-            print("Inserting into Existing table failed : {}".format(str(err)))
+            raise Exception(f"Inserting into Existing table failed : {str(err)}")
 
     def getExists(self):
-        kurs = self.conn.cursor()
         try:
-            kurs.execute("SELECT * FROM Existing")
-            self.conn.commit()
-            return True if int(self.c.fetchone()[0]) else False
+            self.cursor.execute("SELECT doesExist FROM Existing WHERE doesExist = 1")
+            return self.cursor.fetchone() is not None
         except Exception as err:
-            print("Query failed {}".format(err))
+            raise Exception(f"Query failed {str(err)}")
 
-    def getPostingsOfWord(self,listOfWords):
-        query = f"SELECT * FROM Posting WHERE word in ({','.join(['?'] * len(listOfWords))})"
-        kurs = self.conn.cursor()
-        kurs.execute(query,listOfWords)
-        rows = kurs.fetchall()
-        return rows
-
+    def getPostingsOfWord(self, listOfWords):
+        try:
+            query = f"SELECT * FROM Posting WHERE word in ({','.join(['?'] * len(listOfWords))})"
+            self.cursor.execute(query, listOfWords)
+            rows = self.cursor.fetchall()
+            return rows
+        except Exception as err:
+            raise Exception(f"Failed fetching postings: {str(err)}")

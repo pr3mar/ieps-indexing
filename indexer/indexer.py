@@ -5,22 +5,17 @@ from preprocess import Preprocess
 from utils import timing
 from index import IndexFactory
 from db import DB
-from index import ReverseIndex
 
 # executes the:
 #   - pre-processing
 #   - indexing
 #   - querying
 @timing
-def main(indexType, inputPath, outputPath, userQuery, run=True):
-    inputTokens = Preprocess.preprocessFiles(inputPath, outputPath)
-    db = DB(inputPath)
-    index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
-    rev = ReverseIndex(inputTokens, outputPath,db)
-    rev.writeToDb()
-    lista = ["republika","slovenija"]
-    red = db.getPostingsOfWord(lista)
-    print(red)
+def main(indexType, inputPath, outputPath, userQuery, forceRecreate=False, run=True):
+    index = IndexFactory.getIndexByType(indexType, inputPath, outputPath, forceRecreate)
+    index.buildIndex()
+    red = index.search(Preprocess.tokenize(userQuery))
+    print(len(red))
     query = DocumentQuerying(userQuery, index)
 
 
@@ -38,4 +33,4 @@ def processArgs():
 
 
 if __name__ == "__main__":
-    main('reverse', '../input', '../output', 'my query')
+    main('reverse', '../input', '../output', 'Sistem SPOT')
