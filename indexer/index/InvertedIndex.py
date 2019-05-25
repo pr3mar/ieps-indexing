@@ -3,9 +3,10 @@ from db import DB
 from .index import Index
 from preprocess import Preprocess
 
-class ReverseIndex(Index):
+
+class InvertedIndex(Index):
     def __init__(self, inputPath, outputPath, forceRecreate=False):
-        super(ReverseIndex, self).__init__(inputPath, outputPath, forceRecreate)
+        super(InvertedIndex, self).__init__(inputPath, outputPath, forceRecreate)
         self.db = DB(outputPath, forceRecreate=forceRecreate)
 
     @timing
@@ -13,10 +14,10 @@ class ReverseIndex(Index):
         if self.db.getExists() and not self.forceRecreate:
             return
         print("Building the reverse index")
-        inputTokens = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
-        reverseIndex = {}  # holds the reverse index
-        for documentName in inputTokens:
-            fileContent = inputTokens[documentName]
+        preprocessed = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
+        reverseIndex = {}
+        for documentName in preprocessed:
+            fileContent = preprocessed[documentName]
             for token in fileContent['tokens']:
                 indices = [str(i) for i, x in enumerate(fileContent['content']) if x == token]
                 posting = {"documentName": documentName, "frequency": len(indices), "indexes": ','.join(indices)}
