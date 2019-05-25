@@ -3,9 +3,10 @@ from db import DB
 from .index import Index
 from preprocess import Preprocess
 
-class ReverseIndex(Index):
+
+class InverseIndex(Index):
     def __init__(self, inputPath, outputPath, forceRecreate=False):
-        super(ReverseIndex, self).__init__(inputPath, outputPath, forceRecreate)
+        super(InverseIndex, self).__init__(inputPath, outputPath, forceRecreate)
         self.db = DB(outputPath, forceRecreate=forceRecreate)
 
     @timing

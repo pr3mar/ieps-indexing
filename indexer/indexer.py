@@ -16,6 +16,7 @@ def main(indexType, inputPath, outputPath, userQuery, forceRecreate=False, run=T
     index.buildIndex()
     red = index.search(Preprocess.tokenize(userQuery))
     print(len(red))
+    print(sum([x[1] for x in red]))
     query = DocumentQuerying(userQuery, index)
 
 
@@ -33,4 +34,5 @@ def processArgs():
 
 
 if __name__ == "__main__":
-    main('reverse', '../input', '../output', 'Sistem SPOT')
+    main('inverse', '../input', '../output', 'Sistem SPOT')
+    main('sequential', '../input', '../output', 'Sistem SPOT')
