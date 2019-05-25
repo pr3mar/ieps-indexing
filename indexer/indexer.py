@@ -5,6 +5,7 @@ from preprocess import Preprocess
 from utils import timing
 from index import IndexFactory
 from db import DB
+from index import ReverseIndex
 
 # executes the:
 #   - pre-processing
@@ -15,8 +16,13 @@ def main(indexType, inputPath, outputPath, userQuery, run=True):
     inputTokens = Preprocess.preprocessFiles(inputPath, outputPath)
     db = DB(inputPath)
     index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
-    # index.buildIndex()
+    rev = ReverseIndex(inputTokens, outputPath,db)
+    rev.writeToDb()
+    lista = ["republika","slovenija"]
+    red = db.getPostingsOfWord(lista)
+    print(red)
     query = DocumentQuerying(userQuery, index)
+
 
 
 # get user arguments:
