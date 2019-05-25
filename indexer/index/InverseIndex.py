@@ -14,10 +14,10 @@ class InverseIndex(Index):
         if self.db.getExists() and not self.forceRecreate:
             return
         print("Building the reverse index")
-        inputTokens = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
-        reverseIndex = {}  # holds the reverse index
-        for documentName in inputTokens:
-            fileContent = inputTokens[documentName]
+        preprocessed = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
+        reverseIndex = {}
+        for documentName in preprocessed:
+            fileContent = preprocessed[documentName]
             for token in fileContent['tokens']:
                 indices = [str(i) for i, x in enumerate(fileContent['content']) if x == token]
                 posting = {"documentName": documentName, "frequency": len(indices), "indexes": ','.join(indices)}
