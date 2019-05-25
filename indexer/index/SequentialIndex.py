@@ -5,15 +5,15 @@ from .index import Index
 
 
 class SequantialIndex(Index):
-    def __init__(self, inputTokens, outputPath, db):
-        super(SequantialIndex, self).__init__(inputTokens, outputPath, db)
+    def __init__(self, inputPath, outputPath, forceRecreate):
+        super(SequantialIndex, self).__init__(inputPath, outputPath, db, forceRecreate)
 
     @timing
     def buildIndex(self):
         pass  # we do not need to build anything here, as we already have the preprocessed text
 
     @timing
-    def search(self, userQuery):
+    def search(self, query):
         results = {}
         # print(f"query: {Preprocess.tokenize(userQuery)}")
         for queryToken in Preprocess.tokenize(userQuery):

@@ -280,3 +280,4 @@ TSWLatexianTemp*
 __pycache__/*
 *.py[cod]
 .vscode/*
+output/*.json

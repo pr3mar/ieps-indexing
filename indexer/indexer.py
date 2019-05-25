@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import argparse
-import json
 from documentQuerying import DocumentQuerying
 from preprocess import Preprocess
 from utils import timing
@@ -12,14 +11,13 @@ from db import DB
 #   - indexing
 #   - querying
 @timing
-def main(indexType, inputPath, outputPath, userQuery, run=True):
-    inputTokens = Preprocess.preprocessFiles(inputPath, outputPath)
-    db = DB(inputPath)
-    index = IndexFactory.getIndexByType(indexType, inputTokens, outputPath, db)
+def main(indexType, inputPath, outputPath, userQuery, forceRecreate=False, run=True):
+    index = IndexFactory.getIndexByType(indexType, inputPath, outputPath, forceRecreate)
     index.buildIndex()
-    results = index.search(userQuery)
-    print(json.dumps(results, indent=4, sort_keys=True))
+    red = index.search(Preprocess.tokenize(userQuery))
+    print(len(red))
     query = DocumentQuerying(userQuery, index)
+
 
 
 # get user arguments:
@@ -35,4 +33,4 @@ def processArgs():
 
 
 if __name__ == "__main__":
-    main('sequential', '../input', '../output', 'marko')
+    main('reverse', '../input', '../output', 'Sistem SPOT')

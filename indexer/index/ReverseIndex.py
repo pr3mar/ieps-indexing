@@ -1,27 +1,54 @@
 from utils import timing
 from db import DB
 from .index import Index
-
+from preprocess import Preprocess
 
 class ReverseIndex(Index):
-    def __init__(self, inputTokens, outputPath, db):
-        super(ReverseIndex, self).__init__(inputTokens, outputPath, db)
+    def __init__(self, inputPath, outputPath, forceRecreate=False):
+        super(ReverseIndex, self).__init__(inputPath, outputPath, forceRecreate)
+        self.db = DB(outputPath, forceRecreate=forceRecreate)
 
     @timing
     def buildIndex(self):
-        print("Building a reverse index")
-        reverseIndex = {} # holds the revers index
-        for file in self.inputTokens:
-            fileName = file["fileName"]
-            for token in file["tokens"]:
-                pass
-                # todo: if exists -> update
-                # if not -> add
-                # reverseIndex[token]
-        # TODO
-        #   insert into Sqlite
-        #   AT MOST 2 INSERTS
+        if self.db.getExists() and not self.forceRecreate:
+            return
+        print("Building the reverse index")
+        inputTokens = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
+        reverseIndex = {}  # holds the reverse index
+        for documentName in inputTokens:
+            fileContent = inputTokens[documentName]
+            for token in fileContent['tokens']:
+                indices = [str(i) for i, x in enumerate(fileContent['content']) if x == token]
+                posting = {"documentName": documentName, "frequency": len(indices), "indexes": ','.join(indices)}
+                if token not in reverseIndex:
+                    reverseIndex[token] = [posting]
+                else:
+                    reverseIndex[token].append(posting)
+        self.__writeToDb(reverseIndex)
 
     @timing
-    def search(self, userQuery):
-        print("Searching the reverse index")
+    def __writeToDb(self, reverseIndex):
+        # makes a list of tuples like  [("word", "filename", "frequency", "indexes", "indexes_content")] to insert in a Posting table
+        postingRecord = []
+        for word in reverseIndex:
+            for entry in reverseIndex[word]:
+                postingRecord.append(tuple([word] + list(entry.values())))
+        # inserting into the Tables
+        self.db.insertWord(list(reverseIndex.keys()))
+        self.db.insertPosting(postingRecord)
+        self.db.insertExists()
+
+    @timing
+    def search(self, query):
+        """
+        :param query: tokenized query
+        :return: grouped postings
+        """
+        self.db.cursor.execute(f"""
+            SELECT documentName, sum(frequency) as freq, group_concat(indexes)
+            FROM Posting
+            WHERE word IN ({','.join(['?']*len(query))})
+            GROUP BY documentName
+            ORDER BY freq DESC
+        """, query)
+        return self.db.cursor.fetchall()
