@@ -5,7 +5,7 @@ from utils import timing
 
 class DB(object):
 
-    def __init__(self, outputPath, dbName="indexer.db", forceRecreate=False):
+    def __init__(self, outputPath, dbName="inverted-index.db", forceRecreate=False):
         dbPath = os.path.join(outputPath, dbName)
         if os.path.isfile(dbPath) and forceRecreate:
             print("Forcing an update of the reverse index")
