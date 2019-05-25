@@ -33,4 +33,4 @@ def processArgs():
 
 
 if __name__ == "__main__":
-    main('reverse', '../input', '../output', 'trgovina')
+    main('reverse', '../input', '../output', 'predelovalne dejavnosti')

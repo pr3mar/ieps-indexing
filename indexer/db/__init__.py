@@ -7,7 +7,7 @@ class DB(object):
 
     def __init__(self, outputPath, dbName="indexer.db", forceRecreate=False):
         dbPath = os.path.join(outputPath, dbName)
-        if os.path.exists(dbPath) and forceRecreate:
+        if os.path.isfile(dbPath) and forceRecreate:
             print("Forcing an update of the reverse index")
             os.remove(dbPath)
         self.conn = sqlite3.connect(dbPath)
@@ -33,7 +33,7 @@ class DB(object):
 
     def insertWord(self, wordList):
         try:
-            self.conn.execute("BEGIN TRANSACTION")
+            self.cursor.execute("BEGIN TRANSACTION")
             for word in wordList:
                 self.cursor.execute("INSERT INTO IndexWord(word) VALUES(?)", [word])
             self.conn.commit()
@@ -51,7 +51,7 @@ class DB(object):
 
     def insertExists(self):
         try:
-            self.cursor.execute("INSERT INTO Existing(doesExist) VALUES (?)", "1")
+            self.cursor.execute("INSERT INTO Existing(doesExist) VALUES (?)", [1])
             self.conn.commit()
         except Exception as err:
             raise Exception(f"Inserting into Existing table failed : {str(err)}")

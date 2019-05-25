@@ -19,7 +19,7 @@ class Preprocess:
 
     @staticmethod
     @timing
-    def preprocessFiles(rootInputPath, outputPath, forceRecreate=False):
+    def preprocessFiles(rootInputPath, outputPath, forceRecreate=False, debugInfo=False):
         outputFilePath = f"{outputPath}/processed.json"
         if os.path.isfile(outputFilePath) and not forceRecreate:
             with open(outputFilePath, "r") as file:
@@ -27,7 +27,7 @@ class Preprocess:
         processed = {}
         inputPaths = [f for f in glob.glob(rootInputPath + "**/*.html", recursive=True)]
         for idx, documentPath in enumerate(inputPaths):
-            print(f"[{(idx / len(inputPaths)) * 100:.0f}%] Working on {documentPath}")
+            if debugInfo: print(f"[{(idx / len(inputPaths)) * 100:.0f}%] Working on {documentPath}")
             with open(documentPath, mode='r', encoding="utf-8") as file:
                 text = re.sub(r'<[^<]+?>', '', get_text(file.read().lower()))
                 processed[re.compile(r'.*/(.*).html').search(documentPath).group(1)] = {
