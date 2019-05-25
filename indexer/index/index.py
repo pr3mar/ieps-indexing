@@ -1,14 +1,14 @@
 class Index(object):
-    def __init__(self, inputTokens, outputPath, db):
-        self.inputPath = inputTokens
+    def __init__(self, inputPath, outputPath, forceRecreate=False):
+        self.inputPath = inputPath
         self.outputPath = outputPath
-        self.db = db
+        self.forceRecreate = forceRecreate
 
     def buildIndex(self):
         # Builds the index
         pass
 
-    def search(self):
+    def search(self, query):
         # searches the index
         pass
 

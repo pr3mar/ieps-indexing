@@ -3,8 +3,8 @@ from .index import Index
 
 
 class SequantialIndex(Index):
-    def __init__(self, inputTokens, outputPath, db):
-        super(SequantialIndex, self).__init__(inputTokens, outputPath, db)
+    def __init__(self, inputPath, outputPath, forceRecreate):
+        super(SequantialIndex, self).__init__(inputPath, outputPath, db, forceRecreate)
 
     @timing
     def buildIndex(self):
@@ -12,6 +12,6 @@ class SequantialIndex(Index):
         # TODO
 
     @timing
-    def search(self):
+    def search(self, query):
         print("Searching the sequential index")
         # TODO

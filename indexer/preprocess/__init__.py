@@ -11,7 +11,7 @@ from .stopwords import stop_words_slovene
 class Preprocess:
     @staticmethod
     def tokenize(text):
-        return [token for token in word_tokenize(text) if token not in stop_words_slovene and re.match('\w', token)]
+        return list(set([token for token in word_tokenize(text.lower()) if token not in stop_words_slovene and re.match('\w', token)]))
 
     @staticmethod
     def contentize(text):
@@ -19,9 +19,9 @@ class Preprocess:
 
     @staticmethod
     @timing
-    def preprocessFiles(rootInputPath, outputPath, forceUpdate=True):
+    def preprocessFiles(rootInputPath, outputPath, forceRecreate=False):
         outputFilePath = f"{outputPath}/processed.json"
-        if os.path.isfile(outputFilePath) and forceUpdate is False:
+        if os.path.isfile(outputFilePath) and not forceRecreate:
             with open(outputFilePath, "r") as file:
                 return json.load(file)
         processed = {}

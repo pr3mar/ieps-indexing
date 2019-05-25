@@ -1,51 +1,55 @@
 from utils import timing
 from db import DB
 from .index import Index
-
+from preprocess import Preprocess
 
 class ReverseIndex(Index):
-    def __init__(self, inputTokens, outputPath, db):
-        super(ReverseIndex, self).__init__(inputTokens, outputPath, db)
-        self.inputTokens = inputTokens
+    def __init__(self, inputPath, outputPath, forceRecreate=False):
+        super(ReverseIndex, self).__init__(inputPath, outputPath, forceRecreate)
+        self.db = DB(outputPath, forceRecreate=forceRecreate)
 
     @timing
     def buildIndex(self):
-        print("Building a reverse index")
+        if self.db.getExists():
+            return
+        print("Building the reverse index")
+        inputTokens = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
         reverseIndex = {}  # holds the reverse index
-
-        for name in self.inputTokens:
-            cont = self.inputTokens[name]
-            for token in cont['tokens']:
-                indices = [str(i) for i, x in enumerate(cont['tokens']) if x == token]
-                indices_content = [str(i) for i,x in enumerate(cont['content']) if x == token]
+        for documentName in inputTokens:
+            fileContent = self.inputPath[documentName]
+            for token in fileContent['tokens']:
+                indices = [str(i) for i, x in enumerate(fileContent['content']) if x == token]
+                posting = {"documentName": documentName, "frequency": len(indices), "indexes": ','.join(indices)}
                 if token not in reverseIndex:
-                    reverseIndex[token] = [
-                        {"documentName": name, "frequency": len(indices), "indexes": ','.join(indices),"indexes_content":",".join(indices_content)}]
-                elif token in reverseIndex:
-                    if reverseIndex[token][-1]['documentName'] != name:
-                        reverseIndex[token].append(
-                            {"documentName": name, "frequency": len(indices), "indexes": ','.join(indices),
-                             "indexes_content": ','.join(indices_content)})
-        return reverseIndex
-
+                    reverseIndex[token] = [posting]
+                else:
+                    reverseIndex[token].append(posting)
+        self.__writeToDb(reverseIndex)
 
     @timing
-    def search(self):
-        print("Searching the reverse index")
-    @timing
-    def writeToDb(self):
-        reverseIndex = self.buildIndex()
-        # makes a list of tuples like  [("word","filename","frequency","indexes","indexes_content")] to insert in a Posting table
+    def __writeToDb(self, reverseIndex):
+        # makes a list of tuples like  [("word", "filename", "frequency", "indexes", "indexes_content")] to insert in a Posting table
         postingRecord = []
-        for name in reverseIndex:
-            for x in reverseIndex[name]:
-                temp = list(x.values())
-                temp.insert(0,name)
-                postingRecord.append(tuple(temp))
+        for word in reverseIndex:
+            for entry in reverseIndex[word]:
+                postingRecord.append(tuple([word] + list(entry.values())))
+                print(tuple([word] + list(entry.values())))
         # inserting into the Tables
         self.db.insertWord(list(reverseIndex.keys()))
         self.db.insertPosting(postingRecord)
+        self.db.insertExists()
 
-
-
-
+    @timing
+    def search(self, query):
+        """
+        :param query: tokenized query
+        :return: grouped postings
+        """
+        self.db.cursor.execute(f"""
+            SELECT documentName, sum(frequency) as freq, group_concat(indexes)
+            FROM Posting
+            WHERE word IN ({','.join(['?']*len(query))})
+            GROUP BY documentName
+            ORDER BY freq DESC
+        """, query)
+        return self.db.cursor.fetchall()
