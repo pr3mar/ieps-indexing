@@ -34,5 +34,5 @@ def processArgs():
 
 
 if __name__ == "__main__":
-    main('inverse', '../input', '../output', 'Sistem SPOT')
+    main('inverted', '../input', '../output', 'Sistem SPOT')
     main('sequential', '../input', '../output', 'Sistem SPOT')

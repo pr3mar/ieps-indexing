@@ -4,9 +4,9 @@ from .index import Index
 from preprocess import Preprocess
 
 
-class InverseIndex(Index):
+class InvertedIndex(Index):
     def __init__(self, inputPath, outputPath, forceRecreate=False):
-        super(InverseIndex, self).__init__(inputPath, outputPath, forceRecreate)
+        super(InvertedIndex, self).__init__(inputPath, outputPath, forceRecreate)
         self.db = DB(outputPath, forceRecreate=forceRecreate)
 
     @timing
