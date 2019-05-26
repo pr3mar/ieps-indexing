@@ -8,6 +8,7 @@ class InvertedIndex(Index):
         super(InvertedIndex, self).__init__(inputPath, outputPath, forceRecreate)
         self.db = DB(outputPath, forceRecreate=forceRecreate)
         self.indexerType = "Inverted Index"
+        self.type = "inverted"
 
     @timed
     def buildIndex(self):

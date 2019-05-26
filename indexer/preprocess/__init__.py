@@ -24,6 +24,7 @@ class Preprocess:
         if os.path.isfile(outputFilePath) and not forceRecreate:
             with open(outputFilePath, "r") as file:
                 return json.load(file)
+        print("Preprocessing...")
         processed = {}
         inputPaths = [f for f in glob.glob(rootInputPath + "**/*.html", recursive=True)]
         for idx, documentPath in enumerate(inputPaths):

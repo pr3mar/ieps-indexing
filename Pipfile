@@ -12,6 +12,7 @@ bs4 = "*"
 lxml = "*"
 inscriptis = "*"
 texttable = "*"
+prompt_toolkit = "*"
 
 [requires]
 python_version = "3.7"

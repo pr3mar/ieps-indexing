@@ -11,7 +11,7 @@ class DocumentRetrieval:
         preprocessed = self.indexer.preprocessed
         processed = 0
         table = tt.Texttable()
-        table.header(["Id", "Frequency", "Document", "Snippet"])
+        table.header(["Rank", "Frequency", "Document", "Snippet"])
         table.set_cols_width([5, 10, 30, 100])
         table.set_cols_dtype(["i", "i", "t", "t"])
         for result in resultSet:
@@ -22,7 +22,7 @@ class DocumentRetrieval:
             indices = sorted([int(x) for x in result[2].split(",")])
             snippet = ""
             content = preprocessed[documentName]["content"]
-            for i in range(5):
+            for i in range(min(5, len(indices))):
                 idx = indices[i]
                 snippet += " ".join(content[idx-3:idx])
                 snippet += f" *{content[idx]}* "
@@ -30,10 +30,13 @@ class DocumentRetrieval:
                 snippet += " ... "
             table.add_row((processed + 1, frequency, documentName, snippet))
             processed += 1
-        print(table.draw())
+        if processed > 0:
+            print(table.draw())
+        else:
+            print("No results found.")
 
     def query(self, userQuery, numResults=15):
         timePassed, resultSet = self.indexer.search(Preprocess.tokenize(userQuery))
-        print(f"[{self.indexer.indexerType}] Results found for  in {timePassed:.2f} ms")
+        print(f"[{self.indexer.indexerType}] Found {len(resultSet)} results in {timePassed:.2f} ms")
         self.__printResults(resultSet, numResults=numResults)
         return resultSet
