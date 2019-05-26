@@ -1,17 +1,21 @@
 from utils import timing
 from preprocess import Preprocess
+import texttable as tt
 
 
 class DocumentRetrieval:
     def __init__(self, indexer):
         self.indexer = indexer
 
-    def transformOutput(self, resultSet):
+    def __printResults(self, resultSet, numResults = 10):
         preprocessed = self.indexer.preprocessed
         processed = 0
-        output = []
+        table = tt.Texttable()
+        table.header(["Id", "Frequency", "Document", "Snippet"])
+        table.set_cols_width([5, 10, 30, 100])
+        table.set_cols_dtype(["i", "i", "t", "t"])
         for result in resultSet:
-            if processed > 10:
+            if processed >= numResults:
                 break
             documentName = result[0]
             frequency = result[1]
@@ -24,10 +28,12 @@ class DocumentRetrieval:
                 snippet += f" *{content[idx]}* "
                 snippet += " ".join(content[idx + 1:idx + 4])
                 snippet += " ... "
-            output.append((frequency, documentName, snippet))
+            table.add_row((processed + 1, frequency, documentName, snippet))
             processed += 1
-        return output
-    def query(self, userQuery):
+        print(table.draw())
+
+    def query(self, userQuery, numResults=15):
         timePassed, resultSet = self.indexer.search(Preprocess.tokenize(userQuery))
         print(f"[{self.indexer.indexerType}] Results found for  in {timePassed:.2f} ms")
-        print(self.transformOutput(resultSet))
+        self.__printResults(resultSet, numResults=numResults)
+        return resultSet
