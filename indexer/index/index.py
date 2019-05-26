@@ -8,6 +8,7 @@ class Index(object):
         self.forceRecreate = forceRecreate
         self.preprocessed = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
         self.indexerType = "None"
+        self.type = "None"
 
     def buildIndex(self):
         # Builds the index

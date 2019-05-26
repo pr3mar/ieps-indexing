@@ -6,6 +6,7 @@ class SequantialIndex(Index):
     def __init__(self, inputPath, outputPath, forceRecreate):
         super(SequantialIndex, self).__init__(inputPath, outputPath, forceRecreate)
         self.indexerType = "Sequential Index"
+        self.type = "sequential"
 
     @timed
     def buildIndex(self):
