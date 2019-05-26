@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{url,hyperref}
+\usepackage{float}
+\usepackage[bottom]{footmisc}
+\usepackage{fancyvrb}
+\usepackage{textcomp}
+\hypersetup{
+	colorlinks = true,
+	citecolor = green,
+	urlcolor = cyan
+}
+
+\title{
+	Web Information Extraction and Retrieval\\
+	Programming Assignment 3: \\
+	Document indexing and querying
+}
+\author{
+	Marko Prelevikj\\
+	63130345\\
+	\texttt{mp2638@student.uni-lj.si}
+	\and
+	Gojko Hajduković\\
+	63180431\\
+	\texttt{gh8590@student.uni-lj.si}
+	\and
+	Stefan Ivanišević\\
+	63170405\\
+	\texttt{si0539@student.uni-lj.si}
+}
+\date{May 2019}
+
+\begin{document}
+	
+\maketitle
+\section{Introduction}
+With the increasing development of information technologies, in the modern, digital era, most of the documents and informations are stored in a digital format in order to be easy accesible to everyone within the globe. Many of the problems arose when that increasing number of data needed to be stroed efficiently in order for users to have quick access to the information needed. In many informatiion system where some type of searching is required, first natural aprroach in finding a related words,queries within the documents was the naive approach of seqeuntially looking into all of the documents for the specific words, which was very inefficient ragarding to time and space. Nowadays, the most widely used and efficient way of stroring the data in order to be searched from it quickly is the concept of Inverted Index. 
+
+\texttt{Inverted index} represents an efficient technique for storing mappings of words, content to its locations in document or in a set of documents. In this paper we introduce our implementation of first preprocessing the documents, then building an inverted index from the preprocessed content in order to allow users quick search of the content in need. We also implement the naive approach, \texttt{sequential file reading} and compare its efficiency with the approach based on inverted index. Explanation and implementation specifics are provided in following sections.
+
+\section{Data Preprocessing}
+TODO: @Stefan
+
+\section{Inverted Index}
+After the extraction and preprocessing the data from documents, we have used data base in order to simulate the inverted index structure. Database structure is based on three tables:
+\begin{itemize}
+    \item \texttt{IndexWord - } which consists of all the words indexed from the document 
+    \item \texttt{Posting - } which consists of word, a document name in which the specific word appears, frequency of appearence, indexes on which that word appears in the \texttt{pre-processed} version of the document, also we have added the column \texttt{indexes\_content} which contains indexes of word appearance in the original version of the document, before the pre-processing step was applied
+    \item \texttt{Existing - } which consists of a column Exists that we have added in order to store boolean value which indicates whether the Index and Posting tables are built. 
+\end{itemize}
+In order to implement inverted index we took as input of the procedure BuildIndex a dictionary structure which as a key had name of the file and for values lists of tokenized words(preprocessed words) and original content, then we have iterated through each word in the tokenized content and constructed another dictionary that simulates the database structure afore explained where we stored each unique word, frequencies and indexes of its appeareance in the specific document.
+
+\section{Sequential Index}
+
+\section{Data retrieval}
+
+\section{Analysis}
+
+\section{Conclusion}
+Throughout the paper we have introduced our implementation of building inverted index and query against it. Key differences between naive approach of sequential file reading and inverted index are noted supporting with experiments and results which prove how much more efficient the inverted index approach is, which is the reason why that concept is widely used nowadays even though Inverted Index takes much time in constructing the structure it allows very efficient querying.
+
+
+\end{document}
+
