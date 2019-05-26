@@ -1,18 +1,17 @@
-from utils import timing
-from preprocess import Preprocess
+from utils import timing, timed
 from .index import Index
 
 
 class SequantialIndex(Index):
     def __init__(self, inputPath, outputPath, forceRecreate):
         super(SequantialIndex, self).__init__(inputPath, outputPath, forceRecreate)
-        self.preprocessed = {}
+        self.indexerType = "Sequential Index"
 
-    @timing
+    @timed
     def buildIndex(self):
-        self.preprocessed = Preprocess.preprocessFiles(self.inputPath, self.outputPath, self.forceRecreate)
+        pass
 
-    @timing
+    @timed
     def search(self, query):
         results = []
         for documentName in self.preprocessed:

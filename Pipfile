@@ -11,6 +11,7 @@ numpy = "*"
 bs4 = "*"
 lxml = "*"
 inscriptis = "*"
+texttable = "*"
 
 [requires]
 python_version = "3.7"
