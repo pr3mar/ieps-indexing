@@ -1,6 +1,7 @@
 from utils import timing
 from preprocess import Preprocess
 import texttable as tt
+import random
 
 
 class DocumentRetrieval:
@@ -40,3 +41,24 @@ class DocumentRetrieval:
         print(f"[{self.indexer.indexerType}] Found {len(resultSet)} results in {timePassed:.2f} ms")
         self.__printResults(resultSet, numResults=numResults)
         return resultSet
+
+    def randomTokens(self):
+        preprocessed = self.indexer.preprocessed
+        file = random.choice(list(preprocessed.keys()))
+        return " ".join(random.sample(preprocessed[file]["tokens"], random.randint(2, 5)))
+
+    def benchmark(self, repetitions=100):
+        avgTime = 0.0
+        queries = []
+        for i in range(10):
+            query = self.randomTokens()
+            timepassed, resultSetPrev = self.indexer.search(Preprocess.tokenize(query))
+            for j in range(repetitions - 1):
+                avgTime += timepassed
+                timepassed, resultSet = self.indexer.search(Preprocess.tokenize(query))
+                if len(resultSetPrev) != len(resultSet):
+                    raise Exception(f"Not equal result set??? Query: {query}")
+                resultSetPrev = resultSet
+            queries.append((query, len(resultSetPrev)))
+            avgTime += timepassed
+        return queries, avgTime/(10 * repetitions)
