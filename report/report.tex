@@ -10,6 +10,9 @@
 \usepackage{fancyvrb}
 \usepackage{textcomp}
 \usepackage{color}
+\usepackage{footnote}
+
+\makesavenoteenv{table}
 
 \hypersetup{
 	colorlinks = true,
@@ -161,12 +164,103 @@ Some further implementation details worth noting:
     \item[REPL mode] It is possible to enter in an interactive mode where the user is able to: \textit{query} both types of indices, \textit{change} the type of index being queried, force a \textit{recreation} of the index and change the \textit{number of results} printed in the table.
 \end{description}
 
-\section{Analysis}
+\section{Analysis} \label{sec:analysis}
 
-% TODO @ MARKO
+The inverted index has a total of $29667$ words, and $1416$ documents. 
+We summed up the basic statistics of the documents in Table~\ref{tab:1}. Based on the statistics shown in Table~\ref{tab:1} we can conclude that we most retrieved the most tokens from the document named \texttt{podatki.gov.si.340.html}, which consequently leads to having the most occurrences which ranks it as the biggest document.
+
+We summed up the basic statistics of the words occurring in our provided corpus in Table~\ref{tab:2}. We also calculated a weighted mean frequency of the words from the corpus with the formula presented in Equation~\ref{eq:1}.
+\begin{equation}\label{eq:1}
+f_{wi} = \frac{\scriptstyle \sum_{d \in D} f_{i,d}}{\scriptstyle \sum_{d \in D} f_d} * \frac{\scriptstyle \sum_{d \in D} occurence_d(i)}{|D|}
+\end{equation}
+where $f_{wi}$ denotes the weighted frequency of the $i^{th}$ word, $f_{i,d}$ denotes the frequency of the $i^{th}$ word in the $d^{th}$ document, $n_d$ denotes the sum of frequencies of all words appearing in the $d^{th}$ word. The function $occurence_d(i)$ is calculated as presented in Equation~\ref{eq:2}. $D$ denotes the set of documents, i.e. the corpus, whereas $|D|$ denotes the number of documents in the corpus. Translated into \textit{SQL}, we used the query in the listing below.
+
+\begin{equation} \label{eq:2}
+occurrence_d(i)= \left\{
+\begin{array}{ll}
+1 & i \in d \\
+0 & i \not\in d\\
+\end{array} 
+\right. 
+\end{equation}
+
+\begin{lstlisting}[ language=SQL,
+							label={{lst:query2}},
+							deletekeywords={IDENTITY},
+							deletekeywords={[2]INT},
+							morekeywords={clustered},
+							framesep=5pt,
+							xleftmargin=0pt,
+							framexleftmargin=16pt,
+							frame=tb,
+							framerule=0pt ]
+SELECT word, avg(frequency) * sum(1)/1416.0 weightedFreq, sum(1) occurence
+FROM "main"."Posting"
+GROUP BY word
+ORDER BY weightedFreq DESC
+\end{lstlisting}
+
+We went one more step ahead, and we calculated the distribution of the average frequency of words occurring within the document. The visualization of our results is shown in Figure~\ref{fig:1}. The visualized distribution looks like it follows the Poisson distribution, which can be expected and interpreted as having websites with an average number of words occurring on it, and each time we visit one we expect to have so many words, but then there are some documents, such as \texttt{podatki.gov.si.340.html}, which consists of a lot more words because it is some kind of a dictionary, and it contains a lot of meaningful words at one place.
+
+%SELECT documentName, sum(1) '#tokens', sum(frequency) '#occurrences', avg(frequency) 'avg #occurrence'
+%FROM "main"."Posting"
+%GROUP BY documentName
+%ORDER BY  sum(1) DESC, sum(frequency) DESC
+
+
+\begin{figure}
+%	\begin{minipage}{0.45\textwidth}
+		\centering
+		\includegraphics[width=0.9\textwidth]{avgFreq.png}
+		\caption{Distribution of the average frequency of tokens per document.}
+		\label{fig:1}
+%	\end{minipage}\hfill
+%	\begin{minipage}{0.45\textwidth}
+%		\centering
+%		\includegraphics[width=0.9\textwidth]{frontier-manager.png}
+%		\caption{v2.0 of the worker with a \textit{Frontier Manager} which delegates the workload.}
+%		\label{fig:2}
+%	\end{minipage}
+\end{figure}
+
+\begin{table}[hbt!]
+%	\begin{minipage}{0.45\textwidth}
+			\centering
+			\begin{tabular}{r|c|c|c}
+				Page  &  \#Tokens  &  \#Occurrences  &  Mean  \#Occurrences\\
+				\hline
+				% word frequency:
+				podatki.gov.si.340 & 6528 & 27421 & 4.201 \\
+				e-prostor.gov.si.57 & 1679 & 3591 & 2.139 \\
+				evem.gov.si.398 & 1559 & 4252 & 2.727 \\
+				evem.gov.si.651 & 1292 & 2598 & 2.011 \\
+				e-uprava.gov.si.56 & 1191 & 2293 & 1.925 \\
+			\end{tabular}
+			\caption{Documents with most words}
+			\label{tab:1}
+%	\end{minipage}
+\end{table}
+
+\begin{table}[hbt!]
+%	\begin{minipage}{0.45\textwidth}
+			\centering
+			\begin{tabular}{r|c|c|c}
+			% most common word
+				Word  &  Frequency  &  Weighted Mean Frequency \footnote{See Section~\ref{sec:analysis} for more details}  &  \#Occurrences \footnote{*\#Occurrences denotes in how many documents the word appears.} \\
+				\hline
+				podatkov & 11000  &  7.768  &  863 \\
+				slovenije & 8814 & 6.225 & 896 \\
+				republike & 8356 & 5.901 & 1165 \\
+				podatki & 4931 & 3.482 & 732 \\
+				navigation & 4474 & 3.160 & 561 \\
+			\end{tabular}
+		\caption{Basic statistics of the words from the corpus. }
+		\label{tab:2}
+%	\end{minipage}
+\end{table}
 
 \section{Conclusion}
-Throughout the paper we introduced our implementation of building inverted index and query against it. Key differences between naive approach of sequential file reading and inverted index are noted supporting with experiments and results which prove how much more efficient the inverted index approach is, which is the reason why that concept is widely used nowadays even though Inverted Index takes much time in constructing the structure it allows very efficient querying.
+Throughout the paper we introduced our implementation of building inverted index and query against it. Key differences between naive approach of sequential file reading and inverted index are noted supporting with experiments and results which prove how much more efficient the inverted index approach is, which is the reason why that concept is widely used nowadays even though Inverted Index takes much more time in constructing the structure as it allows very efficient querying.
 
 
 \end{document}

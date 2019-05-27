@@ -51,7 +51,7 @@ it is going to re-use the same files each time unless a `--force-recreate` is pr
 This is useful when changing the input files.
 
 ## Report
-**IMPORTANT: THE FOLLOWING FILES IN THE ROOT OF THE REPOSITORY ARE SOFT-LINKED AS DESCRIBED BELOW: **
+**IMPORTANT: THE FOLLOWING FILES IN THE ROOT OF THE REPOSITORY ARE SOFT-LINKED AS DESCRIBED BELOW:**
 
 - `report.pdf` -> `./report/report.pdf`
 - `inverted-index.db` -> `./outputs/inverted-index.db`
