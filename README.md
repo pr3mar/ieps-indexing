@@ -32,6 +32,9 @@ After setting up and entering the newly created environment, run the following:
 # to run a query on the reverse index
 python3 indexer.py -i ../input -o ../output --method inverted --query "social services"
 
+# to run a benchmark test with 100 iterations on the inverted index
+python3 indexer.py -i ../input -o ../output --method inverted --benchmark 100
+
 # re-create the index and perform a single query
 python3 indexer.py -i ../input -o ../output --method inverted --query "social services" --force-recreate
 
