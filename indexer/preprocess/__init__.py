@@ -9,9 +9,16 @@ from .stopwords import stop_words_slovene
 
 
 class Preprocess:
+
+    @staticmethod
+    def hasNumbers(inputString):
+        return any(char.isdigit() for char in inputString)
+
     @staticmethod
     def tokenize(text):
-        return list(set([token for token in word_tokenize(text.lower()) if token not in stop_words_slovene and re.match('\w', token)]))
+        return list(set([token for token in word_tokenize(text.lower()) if token not in stop_words_slovene
+                         and re.match('\w', token)
+                         and not Preprocess.hasNumbers(token)]))
 
     @staticmethod
     def contentize(text):

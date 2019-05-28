@@ -24,6 +24,15 @@ def search():
 
 def repl(dr, numResults=10):
     session = PromptSession()
+    helpMenu = """You have entered in the interactive mode, a list of supported commands: 
+    - help this menu 
+    - max-results <number> - sets the maximum number of results obtained, 
+    - recreate - recreates the current indexer method
+    - indexer-type (inverted|sequential) - sets the type of the indexer
+    - exit - exits the REPL mode
+    - anything else performs a search on the chosen index
+"""
+    print(helpMenu)
     while True:
         try:
             text = session.prompt(f"[{dr.indexer.indexerType}]> Enter query: ")
@@ -51,14 +60,7 @@ def repl(dr, numResults=10):
             elif text == "exit":
                 break
             elif text == "help":
-                print("""
-Enter a query, supporting commands: 
-    - help this menu 
-    - max-results <number> - sets the maximum number of results obtained, 
-    - recreate - recreates the current indexer method
-    - indexer-type (inverted|sequential) - sets the type of the indexer
-    - exit - exits the REPL
-                """)
+                print(helpMenu)
             else:
                 print('Your query:', text)
                 dr.query(text, numResults=numResults)
@@ -91,6 +93,8 @@ def processArgs():
                         help='[optional] Forces the indices to be recreated.')
     parser.add_argument('--interactive', required=False, default=False, action='store_true',
                         help='[optional] Enables interactive mode where the user can enter multiple queries.')
+    parser.add_argument('--benchmark', required=False, default=None, type=int,
+                        help='[optional] Benchmarks the performance N times against a random query')
     parser.add_argument('--query', required=False, default=None,
                         help='[optional] Query to be executed (enter it in quotation marks)')
     parser.add_argument('--num-results', required=False, default=10, type=int,
@@ -100,10 +104,20 @@ def processArgs():
 
 if __name__ == "__main__":
     args = processArgs()
-    # initIndexer('inverted', '../input', '../output')
-    print(f"Recreate? {args.force_recreate}")
     dr = initIndexer(args.method, args.input, args.output, forceRecreate=args.force_recreate)
     if args.interactive:
-        repl(dr, num_results)
+        repl(dr, args.num_results)
     elif args.query:
         dr.query(args.query, numResults=args.num_results)
+    elif args.benchmark:
+        if args.benchmark > 1000:
+            print("Maximum number of repetitions is 1000.")
+            args.benchmark = 1000
+        if args.benchmark < 25:
+            print("Minimum number of repetitions is 25.")
+            args.benchmark = 25
+        queries, result = dr.benchmark(args.benchmark)
+        print(f"Average time needed for {args.benchmark} the following queries:")
+        for query in queries:
+            print(f"\t- `{query[0]}`, #results: {query[1]}")
+        print(f"with {dr.indexer.indexerType} was {result} ms.")
