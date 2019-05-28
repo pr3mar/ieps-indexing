@@ -78,20 +78,18 @@
 	
 	\maketitle
 	\section{Introduction}
-	With the increasing development of information technologies, in the modern, digital era, most of the documents and information are stored in a digital format in order to be easy accessible to everyone within the globe. Many of the problems arose when that increasing number of data needed to be stored efficiently in order for users to have quick access to the information needed. In many information system where some type of searching is required, first natural approach in finding a related words, queries within the documents was the naive approach of sequentially looking into all of the documents for the specific words, which was very inefficient regarding to time and space. Nowadays, the most widely used and efficient way of storing the data in order to be searched from it quickly is the concept of Inverted Index.
+	With the increasing development of information technologies, in the modern, digital era, most of the documents and information are stored in a digital format in order to be easy accessible to everyone within the globe. Many of the problems arose when the increasing amount of data needed to be stored efficiently in order for users to have quick access to the information they needed. In many information systems where some type of search is required, first natural approach in finding related words, queries within the documents was the naive approach of sequentially looking into all of the documents for specific words, which was very inefficient regarding time and space. Nowadays, the most widely used and efficient way of storing the data in order to be searched from quickly is the concept of \textit{Inverted Index}.
 	
-	\texttt{Inverted index} represents an efficient technique for storing mappings of words, content to its locations in document or in a set of documents. In this paper we introduce our implementation of first preprocessing the documents, then building an inverted index from the preprocessed content in order to allow users quick search of the content in need. We also implement the naive approach, \texttt{sequential file reading} and compare its efficiency with the approach based on inverted index. Explanation and implementation specifics are provided in following sections.
+	\textit{Inverted index} represents an efficient technique for storing mappings of words, content to its locations in a single or a set of documents. In this paper we introduce our implementation of an Inverted Index. Firstly, we preprocess the documents, then build an inverted index from the preprocessed content, and then allow the users to quickly search for the content they need by a simple \href{https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop}{ REPL} interface. We also implemented a not-so-naive approach for \textit{sequential file reading} in order to compare the efficiency of the inverted index.
 	
 	\section{Data Pre-processing} \label{sec:Preprocess}
-	For a more efficient indexing step, we needed to preprocess the corpus. The corpus contains 1416 crawled web pages. Each web page is processed in the same manner as described in continuation.
+	For a more efficient indexing step, we need to preprocess the corpus. The corpus contains 1416 crawled web pages. Each web page is processed in the same manner as described in continuation.
 	
-	First, we extract the text data using the package \href{https://pypi.org/project/inscriptis/}{inscriptis}. Beside that, we also normalizing the text into lowercase. Since we retrieved some of the \texttt{HTML} tags alongside with the textual data, we used regex to remove these tags.
+	First, we extract the text data using the package \href{https://pypi.org/project/inscriptis/}{inscriptis} and unify the text into lowercase. Due to the poor performance of the dependent library which leaves behind some \textit{HTML} tags among the content, we extracted them out with regex.
 	
-	The next step during preprocessing was to tokenize the text. We have performed tokenization (splitting up a textual data into words) using the \href{https://www.nltk.org/}{nltk.tokenize} package. During this step, we also removed all the stopwords, special characters, and the all the duplicates among the tokens.
+	The next step of preprocessing the corpus is content tokenization, i.e. splitting up a textual data into, not necessarily meaningful, words. We have performed it using the \href{https://www.nltk.org/}{nltk.tokenize} package. In order to minimize space complexity of our approach we removed all duplicates occurrences of the tokens. To keep the tokens meaningful, we also removed all tokens belonging to a predefined set of stopwords, and eliminated most of the special characters.
 	
-	We have also tokenized the whole textual data from the source file without removing the stopwords and special characters. We need this content in order to easily build up the snippets of the search results which are a part of the real content, and not the tokenized text.
-	
-	The pre-processing output is a dictionary which contains $1416$ keys denoting the source file names. The structure of our pre-processed corpus looks like this:
+	To keep the data retrieval process as efficient as possible, we also tokenized the content of each document without removing the stopwords and special characters. The output of the pre-processing is a dictionary data structure which contains $1416$ keys denoting the source file names. The structure of our pre-processed corpus is available in the listing below. We store this structure on the disk in order to efficiently build the indices and speed-up the sequential data retrieval.
 	
 	\begin{verbatim}
 	{
@@ -112,24 +110,24 @@
 	\end{verbatim}
 	
 	\section{Index building}
-	To be able to benchmark the performance of the indices, we built two different indices: \textit{Inverted Index} and \textit{Sequential Index}. In the following subsections we describe how we are doing that.
+	To be able to benchmark the performance of the indices, we built two different indices: \textit{Inverted Index} and \textit{Sequential Index}. 
+	We use the cached pre-processing output in order to efficiently build the indices. In the following subsections we describe how we build the indices.
 	
 	\subsection{Inverted Index}
-	In our implementation of Inverted index, we used a database in order to simulate the inverted index structure. The database structure is consisted of three tables:
+	In our implementation of the \textit{Inverted index}, we used a database in order to simulate the inverted index structure. The database structure is consisted of three tables:
 	\begin{description}
-		\item[\texttt{IndexWord}] consists of all the words indexed from the documents in the corpus, i.e. our dictionary.
-		\item[\texttt{Posting}] consists of a word from \textit{IndexWord}, a document name in which the specific it appears, the frequency of appearance in the document, and the indices where the word appears in the source document.
-		\item[\texttt{Existing}] consists of a column \texttt{doesExist} that we have added in order to store a single boolean value indicating whether the inverted index has been built. We introduced this to know when we need to perform a re-initialization of the index because that is a costly operation.
+		\item[\texttt{IndexWord}] consists of all the words indexed from the documents in the corpus, i.e. our dictionary, $D$.
+		\item[\texttt{Posting}] consists of a word from \textit{IndexWord}, a document name in which the specific it appears, the frequency of its appearance within the document, and the indices where the word appears in the source document.
+		\item[\texttt{Existing}] consists of a column \texttt{doesExist} which we have added in order to indicate whether the inverted index has already been built, as the rebuilding operation is rather costly.
 	\end{description}
 	
-	In order to construct the \textit{Inverted Index} out of a given pre-processed corpus of words for each file, we have constructed dictionary data structure. It allows us while iterating through the pre-processed corpus of words to store a word out of a given set of words as a key whose values are number of occurrences of a word in each iterated file along with its frequency and indexes of occurrences.
+	In order to construct the \textit{Inverted Index} out of the pre-processed corpus, we have constructed a dictionary data structure which is an in-memory replica of the database. With this structure we are able to store all the required information for a given word: the word it appears in, its frequency within the document, and indices where the word appears within the source document.
 	
-	Next step in our implementation is storing the constructed Inverted index in the database. First, we store the list of the keys from the \textit{Inverted Index} dictionary which represent the set of all unique words from a corpus in the table IndexWord, then we construct a list which holds all postings in the format \newline \texttt{$[(\mbox{word, documentName, frequency, indexes})]$}.
-	
+	The next step of our implementation is to store the constructed \textit{Inverted index} in the database. First, we store the list of keys from the \textit{Inverted Index} dictionary in the table \texttt{IndexWord}. The keys represent the set of all unique words from the provided corpus. Then we construct a list which holds all postings in the format \newline \texttt{$[(\mbox{word, documentName, frequency, indexes})]$}.
 	
 	\subsection{Sequential index}
 	
-	The \textit{Sequential Index} does not require a special procedure of preparing in order to perform the search. We simply use the pre-processed data to perform search on.
+	The \textit{Sequential Index} does not require a special procedure of preparing in order to perform the search. We simply use the pre-processed data to perform the search on.
 	
 	\section{Data retrieval}
 	The data retrieval process (search) is performed on a user provided query which is first pre-processed, to get it in the same form as the rest of the corpus, i.e. it is tokenized. Afterward we are performing the search based on which index has been chosen by the user (either sequential or inverted). Both methods return the results in the same format: a list of tuples containing the cumulative \textit{frequency} per document, the \textit{document} name, and the aggregated \textit{indices} of all results.
